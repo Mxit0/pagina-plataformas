@@ -1,114 +1,74 @@
 import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import Link from 'next/link';
+import { Geist } from "next/font/google";
+import Header from '@/components/Header'; // Importamos el Header
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// --- Datos de simulación (Mock Data) ---
+const mockProducts = [
+  { id: 1, name: "Tarjeta Gráfica RTX 4070", price: 650.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=RTX+4070" },
+  { id: 2, name: "Procesador Ryzen 7 7800X3D", price: 399.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=Ryzen+7" },
+  { id: 3, name: "SSD 2TB NVMe Gen4", price: 120.50, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=SSD+2TB" },
+  { id: 4, name: "RAM 32GB DDR5 6000MHz", price: 150.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=RAM+DDR5" },
+  { id: 5, name: "Placa Madre AM5 B650", price: 210.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=Mobo+B650" },
+  { id: 6, name: "Fuente de Poder 850W Gold", price: 130.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=PSU+850W" },
+];
+// ------------------------------------------
 
+/**
+ * Página principal: Visualización de Catálogo.
+ * Muestra los productos en una cuadrícula.
+ */
 export default function Home() {
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className={`${geistSans.className} font-sans min-h-screen bg-gray-100 dark:bg-gray-900`}>
+      <Header />
+
+      <main className="container mx-auto p-6 sm:p-8">
+        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+          Catálogo de Productos
+        </h1>
+
+        {/* Esta es la grilla de productos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mockProducts.map((product) => (
+            <div
+              key={product.id}
+              className="border border-gray-200 dark:border-gray-700 rounded-lg shadow-md bg-white dark:bg-gray-800 overflow-hidden transition-transform duration-300 hover:shadow-xl hover:-translate-y-1"
+            >
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                width={600}
+                height={400}
+                className="w-full h-48 object-cover"
+                priority={product.id <= 3}
+              />
+              <div className="p-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 truncate" title={product.name}>
+                  {product.name}
+                </h2>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mt-2">
+                  ${product.price.toFixed(2)}
+                </p>
+                <Link
+                  href={`/producto/${product.id}`}
+                  className="mt-4 inline-block w-full text-center bg-blue-600 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Ver Producto
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <footer className="text-center p-6 mt-8 text-gray-500 dark:text-gray-400 text-sm">
+        Proyecto de Estrés de Plataforma - Gestión de Plataformas Informáticas
       </footer>
     </div>
   );
