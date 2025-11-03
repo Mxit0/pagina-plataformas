@@ -4,52 +4,60 @@ import Link from 'next/link';
 import { Geist } from "next/font/google";
 import Header from '@/components/Header';
 import { useState } from 'react';
+import { query } from '@/lib/db'; // 👈 1. Importa la BD
+import type { GetServerSideProps } from 'next'; // 👈 Importa el tipo
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-// --- Datos de simulación (Mock Data) ---
-// Definimos los datos de nuevo para esta página
-const mockProducts = [
-  { id: 1, name: "Tarjeta Gráfica RTX 4070", price: 650.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=RTX+4070", description: "GPU de última generación para gaming en 1440p y alta tasa de refresco. Segunda mano, 6 meses de uso." },
-  { id: 2, name: "Procesador Ryzen 7 7800X3D", price: 399.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=Ryzen+7", description: "El mejor CPU para gaming con tecnología 3D V-Cache. Prácticamente nuevo." },
-  { id: 3, name: "SSD 2TB NVMe Gen4", price: 120.50, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=SSD+2TB", description: "Almacenamiento ultra rápido, ideal para sistema operativo y juegos. 1 año de uso." },
-  { id: 4, name: "RAM 32GB DDR5 6000MHz", price: 150.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=RAM+DDR5", description: "Kit de 2x16GB de memoria RAM de alta velocidad. Compatible con EXPO y XMP." },
-  { id: 5, name: "Placa Madre AM5 B650", price: 210.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=Mobo+B650", description: "Placa base robusta para la nueva generación de procesadores AMD. Estado: Usada." },
-  { id: 6, name: "Fuente de Poder 850W Gold", price: 130.00, imageUrl: "https://placehold.co/600x400/2d3748/e2e8f0?text=PSU+850W", description: "Fuente de poder certificada 80+ Gold, modular. Con todos sus cables." },
-];
-// ------------------------------------------
+// ... (Geist se queda igual) ...
+
+// ❌ 2. ELIMINA EL ARRAY 'mockProducts' DE AQUÍ ❌
 
 /**
  * Página de detalle de producto.
- * Muestra un solo producto con un diseño de 2 columnas.
+ * Recibe 'product' como prop desde el servidor.
  */
-export default function ProductoPage() {
+// 3. Recibe 'product' como prop
+export default function ProductoPage({ product }: { product: any }) {
   const router = useRouter();
-  const { id } = router.query;
-  const [message, setMessage] = useState(''); // Estado para el mensaje de simulación
+  const [message, setMessage] = useState('');
 
-  // Buscamos el producto basado en el ID de la URL
-  const product = mockProducts.find(p => p.id === Number(id));
-
-  // --- Simulación de Compra (SOLO FRONTEND) ---
-  const handlePurchase = () => {
-    setMessage('Procesando simulación...');
+  // 4. Modificamos la simulación de compra (ver Paso 5)
+  const handlePurchase = async () => {
+    setMessage('Procesando compra real...');
     
-    // Simula una espera y luego muestra el mensaje
-    setTimeout(() => {
-      setMessage(`¡Compra simulada con éxito para ${product?.name}!`);
+    try {
+      // Usamos 'fetch' para llamar a nuestra propia API
+      const response = await fetch('/api/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: product.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error en la compra');
+      }
       
-      // Oculta el mensaje después de 3 segundos
-      setTimeout(() => {
-        setMessage('');
-      }, 3000);
-    }, 1000); // 1 segundo de espera simulada
+      setMessage(`¡Compra registrada con éxito para ${product.name}!`);
+
+    } catch (error: any) {
+      setMessage(`Error: ${error.message}`);
+    }
+
+    // Oculta el mensaje después de 3 segundos
+    setTimeout(() => {
+      setMessage('');
+    }, 3000);
   };
 
-  // Si no se encuentra el producto, muestra un mensaje
+  // 5. La lógica de 'producto no encontrado' ahora funciona con los datos reales
   if (!product) {
     return (
       <div className={`${geistSans.className} font-sans min-h-screen bg-gray-100 dark:bg-gray-900`}>
@@ -64,18 +72,16 @@ export default function ProductoPage() {
     );
   }
 
-  // Si se encuentra el producto, muestra el diseño de 2 columnas
+  // 6. El resto de la página usa el prop 'product'
   return (
     <div className={`${geistSans.className} font-sans min-h-screen bg-gray-100 dark:bg-gray-900`}>
       <Header />
       <main className="container mx-auto p-6 sm:p-8">
-        {/* Este es el layout de 2 columnas */}
         <div className="flex flex-col md:flex-row gap-8 bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
           
-          {/* Columna de Imagen */}
           <div className="md:w-1/2">
             <Image
-              src={product.imageUrl}
+              src={product.imageurl}
               alt={product.name}
               width={800}
               height={600}
@@ -83,26 +89,25 @@ export default function ProductoPage() {
             />
           </div>
           
-          {/* Columna de Información y Compra */}
           <div className="md:w-1/2 flex flex-col">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-50">{product.name}</h1>
             <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 my-4">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </p>
             <p className="text-gray-700 dark:text-gray-300 text-lg mb-6">
               {product.description}
             </p>
 
-            <div className="mt-auto"> {/* Empuja el botón y mensaje al final */}
+            <div className="mt-auto">
               <button
                 onClick={handlePurchase}
                 className="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-700 transition-colors duration-300"
               >
-                Simular Compra
+                Simular Compra (Real en BD)
               </button>
               
               {message && (
-                <p className="mt-4 text-center font-medium text-green-700 dark:text-green-400">
+                <p className={`mt-4 text-center font-medium ${message.startsWith('Error') ? 'text-red-600' : 'text-green-700 dark:text-green-400'}`}>
                   {message}
                 </p>
               )}
@@ -113,3 +118,33 @@ export default function ProductoPage() {
     </div>
   );
 }
+
+/**
+ * 7. SSR para la página de detalle
+ * Obtiene el 'id' del contexto y busca UN solo producto.
+ */
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  try {
+    const { id } = context.params!; // 'id' viene de la URL (ej: /producto/3)
+
+    // ¡IMPORTANTE! Usa consultas parametrizadas ($1)
+    // para prevenir Inyección SQL.
+    const sql = 'SELECT * FROM products WHERE id = $1';
+    const { rows } = await query(sql, [id]);
+
+    const product = rows[0] || null; // Obtiene el primer resultado o null
+
+    return {
+      props: {
+        product: product,
+      },
+    };
+  } catch (error) {
+    console.error('Error al obtener producto:', error);
+    return {
+      props: {
+        product: null,
+      },
+    };
+  }
+};
