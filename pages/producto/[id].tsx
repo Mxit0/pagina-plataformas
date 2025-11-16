@@ -86,6 +86,7 @@ export default function ProductoPage({ product }: { product: any }) {
               width={800}
               height={600}
               className="w-full rounded-lg object-cover border dark:border-gray-700"
+              unoptimized={true}
             />
           </div>
           

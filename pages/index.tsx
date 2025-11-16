@@ -43,6 +43,7 @@ export default function Home({ products }: { products: any[] }) {
                 height={400}
                 className="w-full h-48 object-cover"
                 priority={product.id <= 3}
+                unoptimized={true}
               />
               <div className="p-4">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 truncate" title={product.name}>
